@@ -1,22 +1,24 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-const hbs = require('hbs');
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
-// 1. Routes
-const indexRouter = require('./app_server/routes/index');
-const travelRouter = require('./app_server/routes/travel');
+// Routers (MVC routes live in app_server/routes)
+var indexRouter = require('./app_server/routes/index');
+var usersRouter = require('./app_server/routes/users');
+var travelRouter = require('./app_server/routes/travel');
+var handlebars = require('hbs');
 
-const app = express();
+var app = express();
 
-// 2. View engine setup
+// view engine setup
 app.set('views', path.join(__dirname, 'app_server', 'views'));
-app.set('view engine', 'hbs');
 
-// 3. Register Handlebars partials
-hbs.registerPartials(path.join(__dirname, 'app_server', 'views', 'partials'));
+// register handlebars partials (https://www.npmjs.com/package/hbs)
+handlebars.registerPartials(__dirname + '/app_server/views/partials');
+
+app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -24,22 +26,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 4. Wire routes
+// wire up routes
 app.use('/', indexRouter);
+app.use('/users', usersRouter);
 app.use('/travel', travelRouter);
 
-// Catch 404 and forward to error handler
+// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// Error handler
+// error handler
 app.use(function(err, req, res, next) {
-  // Set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // Render the error page
   res.status(err.status || 500);
   res.render('error');
 });
