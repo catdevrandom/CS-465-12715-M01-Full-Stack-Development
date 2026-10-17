@@ -4,10 +4,13 @@ const tripsController = require('../controllers/trips');
 
 router
   .route('/trips')
-  .get(tripsController.tripsList);
+  .get(tripsController.tripsList)
+  .post(tripsController.tripsAddTrip);
 
 router
   .route('/trips/:tripCode')
-  .get(tripsController.tripsFindByCode);
+  .get(tripsController.tripsFindByCode)
+  .put(tripsController.tripsUpdateTrip)
+  .delete(tripsController.tripsDeleteTrip);
 
 module.exports = router;
