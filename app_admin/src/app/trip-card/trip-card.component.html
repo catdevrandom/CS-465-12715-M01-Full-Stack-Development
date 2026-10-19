@@ -8,7 +8,7 @@
     </p>
     <p class="card-text" [innerHTML]="trip.description"></p>
   </div>
-  <div class="card-footer">
+  <div class="card-footer" *ngIf="isLoggedIn()">
     <button type="button" class="btn btn-info" (click)="editTrip(trip)">Edit Trip</button>
     <button type="button" class="btn btn-danger ms-2" (click)="deleteTrip(trip)">Delete</button>
   </div>

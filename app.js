@@ -1,3 +1,5 @@
+require('dotenv').config(); // MODULE 7: load JWT_SECRET from .env (must be first)
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -14,6 +16,10 @@ var handlebars = require('hbs');
 // Bring in the database
 require('./app_api/models/db'); // CHANGED: models moved to app_api
 
+// MODULE 7: wire in our authentication module
+var passport = require('passport');
+require('./app_api/config/passport');
+
 var app = express();
 
 // view engine setup
@@ -29,6 +35,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize()); // MODULE 7: initialize passport
 
 // ADDED (Module 6): enable CORS so the Angular admin (port 4200) can call the API
 app.use('/api', (req, res, next) => {
@@ -46,6 +53,16 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/travel', travelRouter);
 app.use('/api', apiRouter); // ADDED: wire up API routes
+
+// MODULE 7: catch unauthorized errors and return a 401
+// (must come BEFORE the generic error handler below)
+app.use((err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({ message: err.name + ': ' + err.message });
+  } else {
+    next(err);
+  }
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

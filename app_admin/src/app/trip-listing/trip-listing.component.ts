@@ -1,53 +1,74 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { TripCardComponent } from '../trip-card/trip-card.component';
-import { TripDataService } from '../services/trip-data.service';
-import { Trip } from '../models/trip';
-import { trips as mockTrips } from '../data/trips';
+import { Inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { BROWSER_STORAGE } from '../storage';
+import { User } from '../models/user';
+import { AuthResponse } from '../models/auth-response';
+import { TripDataService } from './trip-data.service';
 
-@Component({
-  selector: 'app-trip-listing',
-  standalone: true,
-  imports: [CommonModule, TripCardComponent],
-  templateUrl: './trip-listing.component.html',
-  styleUrl: './trip-listing.component.css'
-})
-export class TripListingComponent implements OnInit {
-  trips: Array<any> = [];
-  message: string = '';
+@Injectable({ providedIn: 'root' })
+export class AuthenticationService {
+  constructor(
+    @Inject(BROWSER_STORAGE) private storage: Storage,
+    private tripDataService: TripDataService
+  ) {}
 
-  // Set to true to render the mock data in src/app/data/trips.ts (functional testing)
-  useMock = false;
-
-  constructor(private tripDataService: TripDataService, private router: Router) {}
-
-  public addTrip(): void {
-    this.router.navigate(['add-trip']);
+  // Get our token from storage (key: travlr-token)
+  public getToken(): string {
+    const out = this.storage.getItem('travlr-token');
+    return out ? out : '';
   }
 
-  public getStuff(): void {
-    if (this.useMock) {
-      this.trips = mockTrips;
-      this.message = 'Showing mock data';
-      return;
+  // Save our token to storage
+  public saveToken(token: string): void {
+    this.storage.setItem('travlr-token', token);
+  }
+
+  // Log out by removing the token
+  public logout(): void {
+    this.storage.removeItem('travlr-token');
+  }
+
+  // True only if a token exists and has not expired
+  public isLoggedIn(): boolean {
+    const token: string = this.getToken();
+    if (!token) {
+      return false;
     }
-    this.tripDataService.getTrips().subscribe({
-      next: (value: Trip[]) => {
-        this.trips = value;
-        this.message = value.length > 0
-          ? 'There are ' + value.length + ' trips available.'
-          : 'There were no trips retrieved from the database';
-        console.log(this.message);
-      },
-      error: (error: any) => {
-        console.log('Error: ' + error);
-      }
-    });
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp > Date.now() / 1000;
+    } catch {
+      return false;
+    }
   }
 
-  ngOnInit(): void {
-    console.log('ngOnInit');
-    this.getStuff();
+  // Only call after isLoggedIn() returns true
+  public getCurrentUser(): User {
+    const token: string = this.getToken();
+    const { email, name } = JSON.parse(atob(token.split('.')[1]));
+    return { email, name } as User;
+  }
+
+  // Log in and store the returned token
+  public login(user: User, passwd: string): Observable<AuthResponse> {
+    return this.tripDataService.login(user, passwd).pipe(
+      tap((value: AuthResponse) => {
+        if (value && value.token) {
+          this.saveToken(value.token);
+        }
+      })
+    );
+  }
+
+  // Register and store the returned token (the API logs the user in)
+  public register(user: User, passwd: string): Observable<AuthResponse> {
+    return this.tripDataService.register(user, passwd).pipe(
+      tap((value: AuthResponse) => {
+        if (value && value.token) {
+          this.saveToken(value.token);
+        }
+      })
+    );
   }
 }
