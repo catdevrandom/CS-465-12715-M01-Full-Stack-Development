@@ -61,12 +61,13 @@ const tripsUpdateTrip = async (req, res) => {
         perPerson: req.body.perPerson,
         image: req.body.image,
         description: req.body.description
-      }
+      },
+      { new: true, runValidators: true }
     ).exec();
     if (!q) {
       return res.status(404).json({ message: `Trip ${req.params.tripCode} not found` });
     }
-    return res.status(201).json(q);
+    return res.status(200).json(q);
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }

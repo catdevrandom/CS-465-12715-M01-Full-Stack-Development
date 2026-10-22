@@ -28,5 +28,25 @@
         "perPerson": "1999.00",
         "image": "reef3.jpg",
         "description": "<p>Claire's Reef Donec sed felis risus. Nulla facilisi. Donec a orci tellus, et auctor odio. Fusce ac orci nibh, quis semper arcu.</p>"
+    },
+    {
+        "code": "CANC210214",
+        "name": "Cancun Escape",
+        "length": "4 nights / 5 days",
+        "start": "2021-02-14T08:00:00Z",
+        "resort": "Emerald Bay, 3 stars",
+        "perPerson": "799.00",
+        "image": "kayak.jpg",
+        "description": "<p>Sun, sand, and snorkeling in Cancun.</p>"
+    },
+    {
+        "code": "TAHI210328",
+        "name": "Tahiti Retreat",
+        "length": "6 nights / 7 days",
+        "start": "2021-03-28T08:00:00Z",
+        "resort": "Hedonist Heaven, 5 stars",
+        "perPerson": "1799.00",
+        "image": "sea-sound.jpg",
+        "description": "<p>Overwater bungalows and lagoon tours.</p>"
     }
 ]

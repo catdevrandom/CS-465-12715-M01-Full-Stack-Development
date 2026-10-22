@@ -28,6 +28,9 @@ app.set('views', path.join(__dirname, 'app_server', 'views'));
 // register handlebars partials (https://www.npmjs.com/package/hbs)
 handlebars.registerPartials(__dirname + '/app_server/views/partials');
 
+// helper: show only the yyyy-mm-dd part of an ISO date
+handlebars.registerHelper('shortDate', d => String(d).substring(0, 10));
+
 app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
